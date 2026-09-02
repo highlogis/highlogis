@@ -2,82 +2,39 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>주식회사 하이로지스 | 정직한 운송, 빠른 정산</title>
-  <meta name="description" content="주식회사 하이로지스 공식 홈페이지. 화물운송, 고정노선, 차주·화물운송기사 모집 및 운송 상담.">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="주식회사 하이로지스 - 정직한 운송, 빠른 정산">
+  <title>주식회사 하이로지스 | HIGH LOGIS</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header class="header">
-  <div class="wrap nav">
-    <a class="brand" href="#home"><span class="mark">H</span><span>HIGH LOGIS<small>주식회사 하이로지스</small></span></a>
-    <button class="menu" aria-label="메뉴" onclick="document.body.classList.toggle('open')">☰</button>
-    <nav>
-      <a href="#about">회사소개</a><a href="#service">운송서비스</a><a href="#recruit">차주·기사모집</a>
-      <a href="#strength">하이로지스 강점</a><a href="#contact">고객문의</a>
-    </nav>
-  </div>
+  <a class="brand" href="#top"><img src="images/logo.png" alt="HIGH LOGIS 주식회사 하이로지스"></a>
+  <nav class="nav">
+    <a href="#company">회사소개</a><a href="#service">운송서비스</a><a href="#system">운영시스템</a><a href="#contact">고객지원</a>
+  </nav>
+  <a class="cta" href="tel:1644-1712">운송·기사 문의</a>
 </header>
 
-<main id="home">
-<section class="hero">
-  <div class="wrap hero-grid">
-    <div>
-      <p class="eyebrow">HIGH LOGIS · LOGISTICS PARTNER</p>
-      <h1>정직한 운송,<br><em>빠른 정산.</em></h1>
-      <p class="lead">운송사와 차주가 오래 함께할 수 있도록<br>투명하고 안정적인 물류 운영을 만들어갑니다.</p>
-      <div class="actions"><a class="btn primary" href="#contact">운송 문의하기</a><a class="btn ghost" href="#recruit">기사·차주 지원</a></div>
-      <div class="trust"><span>✓ 투명한 운임 구조</span><span>✓ 안정적인 고정노선</span><span>✓ 신속한 상담</span></div>
-    </div>
-    <div class="hero-card">
-      <div class="route"><span>수도권</span><b>→</b><span>전국</span></div>
-      <strong>기업 물류 운송 파트너</strong>
-      <p>현장 중심의 운영과 체계적인 배차 관리로 안정적인 운송 서비스를 제공합니다.</p>
-      <div class="truck">HIGH<br><b>LOGIS</b><i>▰▰</i></div>
-    </div>
+<main id="top">
+<section class="hero" aria-label="하이로지스 메인 슬라이드">
+  <div class="slides">
+    <!-- 확정 순서: 기존 3 → 2 → 1 → 4 -->
+    <article class="slide active" style="--bg:url('images/slide3.jpg')"><div class="shade"></div><div class="copy"><span>01 / HIGH LOGIS</span><h1>체계적인 운영으로<br>물류의 흐름을 연결합니다</h1><p>실시간 배차 · 전국 네트워크 · 안전한 화물관리</p></div></article>
+    <article class="slide" style="--bg:url('images/slide2.jpg')"><div class="shade"></div><div class="copy dark"><span>02 / TRANSPORT</span><h2>전국을 연결하는<br>전문 운송 서비스</h2><p>수도권부터 중·장거리까지 안정적인 운송 서비스를 제공합니다.</p></div></article>
+    <article class="slide" style="--bg:url('images/slide1.jpg')"><div class="shade"></div><div class="copy"><span>03 / TRUST</span><h2>정직한 운송,<br>빠른 정산</h2><p>신뢰로 연결하는 운송 파트너, 하이로지스</p></div></article>
+    <article class="slide" style="--bg:url('images/slide4.jpg')"><div class="shade"></div><div class="copy dark"><span>04 / PROMISE</span><h2>24시간 멈추지 않는<br>하이로지스의 약속</h2><p>고객의 소중한 화물을 안전하고 신속하게 목적지까지 운송합니다.</p></div></article>
   </div>
+  <div class="dots" aria-label="슬라이드 선택"><button class="on" aria-label="1번"></button><button aria-label="2번"></button><button aria-label="3번"></button><button aria-label="4번"></button></div>
+  <div class="scroll">SCROLL ↓</div>
 </section>
 
-<section id="about" class="section">
- <div class="wrap two">
-  <div><p class="eyebrow blue">ABOUT HIGH LOGIS</p><h2>신뢰를 운송하는<br>물류회사</h2></div>
-  <div class="copy"><p>하이로지스는 단순히 화물을 옮기는 데 그치지 않습니다. 운송 과정의 투명성, 정확한 소통, 안정적인 운영을 기본으로 고객사와 차주 모두가 신뢰할 수 있는 물류 환경을 지향합니다.</p><p>현장의 목소리를 빠르게 반영하고 지속 가능한 운송 네트워크를 구축하겠습니다.</p></div>
- </div>
-</section>
-
-<section id="service" class="section soft">
- <div class="wrap"><p class="eyebrow blue">OUR SERVICE</p><h2>하이로지스 운송서비스</h2>
- <div class="cards">
-  <article><span>01</span><h3>기업 화물운송</h3><p>기업 물류 특성에 맞춘 안정적인 운송 운영과 배차 관리를 제공합니다.</p></article>
-  <article><span>02</span><h3>고정노선 운영</h3><p>정기적인 물량과 노선에 적합한 차량을 배치해 운송 효율을 높입니다.</p></article>
-  <article><span>03</span><h3>차주 네트워크</h3><p>현장 경험을 갖춘 차주·기사 네트워크를 기반으로 운송 대응력을 확보합니다.</p></article>
- </div></div>
-</section>
-
-<section id="recruit" class="section dark">
- <div class="wrap recruit">
-  <div><p class="eyebrow">DRIVER RECRUIT</p><h2>함께 성장할<br>차주·기사님을 찾습니다.</h2><p>실제 노선과 운송 조건을 투명하게 안내하고, 장기적으로 함께할 수 있는 운송 환경을 만들겠습니다.</p></div>
-  <div class="recruit-box"><h3>차주·화물운송기사 모집</h3><ul><li>고정노선 및 운행정보 상담</li><li>초보 기사 운행 상담</li><li>차량 보유·구매 관련 상담</li><li>운송 조건 및 정산 안내</li></ul><a class="btn white" href="#contact">모집 상담 신청</a></div>
- </div>
-</section>
-
-<section id="strength" class="section">
- <div class="wrap center"><p class="eyebrow blue">WHY HIGH LOGIS</p><h2>기본을 지키는 것이<br>가장 강한 경쟁력입니다.</h2>
- <div class="numbers"><div><b>01</b><strong>정직</strong><p>운임과 조건을 투명하게 안내합니다.</p></div><div><b>02</b><strong>안정</strong><p>지속 가능한 노선 운영을 지향합니다.</p></div><div><b>03</b><strong>소통</strong><p>현장의 문제에 빠르게 대응합니다.</p></div><div><b>04</b><strong>신뢰</strong><p>약속과 정산의 원칙을 지킵니다.</p></div></div>
- </div>
-</section>
-
-<section id="contact" class="contact">
- <div class="wrap contact-grid">
-  <div><p class="eyebrow">CONTACT</p><h2>운송과 기사모집,<br>하이로지스에 문의하세요.</h2><p>상담 내용을 확인한 뒤 담당자가 안내해 드립니다.</p></div>
-  <div class="contact-box"><small>대표전화</small><a href="tel:16441712">1644-1712</a><p>운송문의 · 노선문의 · 차주/기사 지원</p><p class="muted">※ 운영시간 및 상세 회사정보는 최종 확인 후 반영합니다.</p></div>
- </div>
-</section>
+<section id="company" class="section intro"><div><small>ABOUT HIGH LOGIS</small><h2>신뢰를 운송하는<br>물류 파트너</h2></div><p>하이로지스는 투명한 운영과 체계적인 배차 시스템을 기반으로 고객과 차주 모두가 신뢰할 수 있는 운송 환경을 만들어갑니다.</p></section>
+<section id="service" class="section cards"><article><b>01</b><h3>전국 화물 운송</h3><p>주요 거점을 연결하는 안정적인 운송 네트워크</p></article><article><b>02</b><h3>실시간 배차</h3><p>운송 상황에 맞춘 신속하고 효율적인 배차 운영</p></article><article><b>03</b><h3>차주 파트너십</h3><p>투명한 조건과 빠른 소통을 기반으로 함께 성장</p></article></section>
+<section id="system" class="band"><small>HIGH LOGIS SYSTEM</small><h2>운송의 시작부터 정산까지<br>더 빠르고 더 투명하게.</h2></section>
+<section id="contact" class="contact"><img src="images/logo.png" alt="HIGH LOGIS"><div><small>CONTACT</small><h2>하이로지스와 함께하세요.</h2><a href="tel:1644-1712">1644-1712</a></div></section>
 </main>
-
-<footer><div class="wrap footer"><div><b>HIGH LOGIS</b><p>주식회사 하이로지스</p></div><p>© 2026 HIGH LOGIS. All rights reserved.</p></div></footer>
-<script>
-document.querySelectorAll('nav a').forEach(a=>a.addEventListener('click',()=>document.body.classList.remove('open')));
-</script>
+<footer>© HIGH LOGIS CO., LTD. ALL RIGHTS RESERVED.</footer>
+<script src="script.js"></script>
 </body>
 </html>
