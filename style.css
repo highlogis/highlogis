@@ -66,3 +66,66 @@
   .nav a{font-size:22px}
   .cta{margin-left:16px;font-size:17px}
 }
+
+
+/* V9 - top navigation restored, phone added; V8 bottom menu preserved */
+@media (min-width:1160px){
+  .nav{
+    gap:26px;
+  }
+  .nav a{
+    font-size:18px;
+    font-weight:800;
+  }
+  .cta{
+    margin-left:26px;
+    padding:16px 22px;
+    font-size:17px;
+  }
+
+  .header-phone{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    margin-left:22px;
+    padding-left:22px;
+    border-left:1px solid rgba(255,255,255,.28);
+    text-decoration:none;
+    white-space:nowrap;
+    line-height:1.05;
+  }
+  .header-phone small{
+    color:#c9d6e5;
+    font-size:11px;
+    font-weight:700;
+    margin-bottom:5px;
+    letter-spacing:.5px;
+  }
+  .header-phone strong{
+    color:#25a4ff;
+    font-size:23px;
+    font-weight:900;
+    letter-spacing:.4px;
+  }
+
+  /* keep V8 bottom menu exactly prominent */
+  .quickbar{height:165px}
+  .quickbar a{padding:24px 34px}
+  .quickbar small{font-size:18px;letter-spacing:1.8px}
+  .quickbar strong{font-size:40px;line-height:1.05;margin:9px 0}
+  .quickbar span{font-size:20px}
+  .scroll{bottom:180px}
+}
+
+@media (min-width:1160px) and (max-width:1500px){
+  .brand{min-width:245px}
+  .header-phone{margin-left:12px;padding-left:12px}
+  .header-phone strong{font-size:19px}
+  .nav{gap:14px}
+  .nav a{font-size:15px}
+  .cta{margin-left:14px;font-size:15px}
+}
+
+@media (max-width:1159px){
+  .header-phone{display:none}
+}
