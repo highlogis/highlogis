@@ -41,3 +41,28 @@
 .quickbar span{font-size:12px}
 .scroll{bottom:124px}
 }
+
+
+/* V8 - requested stronger typography */
+@media (min-width:1160px){
+  /* top menu: about 50% larger than V7 */
+  .nav{gap:24px}
+  .nav a{font-size:27px;font-weight:800}
+  .cta{font-size:20px;padding:16px 22px}
+
+  /* bottom menu: about 2x V7 */
+  .quickbar{height:165px}
+  .quickbar a{padding:24px 34px}
+  .quickbar small{font-size:18px;letter-spacing:1.8px}
+  .quickbar strong{font-size:40px;line-height:1.05;margin:9px 0}
+  .quickbar span{font-size:20px}
+  .scroll{bottom:180px}
+}
+
+/* keep navigation usable on slightly narrower desktops */
+@media (min-width:1160px) and (max-width:1500px){
+  .brand{min-width:245px}
+  .nav{gap:16px}
+  .nav a{font-size:22px}
+  .cta{margin-left:16px;font-size:17px}
+}
