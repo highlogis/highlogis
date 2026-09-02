@@ -21,3 +21,23 @@
 .section{padding-top:85px;padding-bottom:85px}
 @media(max-width:1150px){.nav{gap:14px}.nav a{font-size:12px}.brand{min-width:195px}.brand strong{font-size:16px}.cta{margin-left:14px}}
 @media(max-width:800px){.brand{min-width:0}.brand img{width:52px;height:54px}.brand strong{font-size:14px}.brand small{font-size:8px}.quickbar{left:0;right:0;height:145px}.quickbar a{padding:12px 9px}.quickbar strong{font-size:14px}.quickbar span{font-size:9px}.quickbar small{font-size:7px}.scroll{display:none}}
+
+/* V7 typography */
+@media (min-width:1160px){
+.header{height:96px;padding:8px 4.8vw}
+.brand{min-width:300px;gap:14px}
+.brand img{width:82px;height:78px}
+.brand strong{font-size:27px}
+.brand small{font-size:14px}
+.nav{gap:26px}
+.nav a{font-size:18px;font-weight:800}
+.cta{margin-left:26px;padding:16px 22px;font-size:17px}
+.copy span{font-size:15px}
+.copy p{font-size:20px;font-weight:700}
+.quickbar{height:110px}
+.quickbar a{padding:16px 25px}
+.quickbar small{font-size:10px}
+.quickbar strong{font-size:21px}
+.quickbar span{font-size:12px}
+.scroll{bottom:124px}
+}
