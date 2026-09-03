@@ -4,13 +4,14 @@
 
 .kakao-submit{display:block;width:300px;max-width:100%;box-sizing:border-box;margin:12px auto 0;text-align:center;border:1px solid #0878e8;border-radius:6px;color:#0878e8;text-decoration:none;padding:16px;font-weight:900}.partner-choice-modal{display:none;position:fixed;inset:0;z-index:1100}.partner-choice-modal.open{display:block}.partner-choice-box{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(650px,90vw);background:#fff;padding:45px;border-radius:8px;box-shadow:0 30px 80px #0006}.partner-choice-close{position:absolute;right:20px;top:14px;border:0;background:none;font-size:34px;cursor:pointer}.partner-choice-box small{color:#0878e8;font-weight:900;letter-spacing:2px}.partner-choice-box h2{font-size:30px;margin:10px 0 25px}.partner-choice-options{display:grid;grid-template-columns:1fr 1fr;gap:12px}.partner-choice-options a{padding:25px;background:#f3f7fb;border-top:3px solid #0878e8;text-decoration:none;color:#0b1c32}.partner-choice-options b{display:block;font-size:19px;margin-bottom:8px}.partner-choice-options span{font-size:13px;color:#687585;line-height:1.5}@media(max-width:800px){.partner-choice-options{grid-template-columns:1fr}.partner-choice-box{padding:35px 20px}}
 
-/* Partner Kakao channel banner */
-.partner-kakao-banner{max-width:1180px;margin:-46px auto 58px;padding:0 28px;position:relative;z-index:3}
-.partner-kakao-banner .banner-inner{background:#fee500;border-radius:22px;padding:30px 36px;display:flex;align-items:center;justify-content:space-between;gap:30px;box-shadow:0 18px 45px rgba(10,30,60,.16)}
-.partner-kakao-banner .banner-copy{display:flex;align-items:center;gap:20px;color:#191919}
-.partner-kakao-banner .kakao-mark{width:58px;height:58px;border-radius:18px;background:#191919;color:#fee500;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:22px;flex:0 0 auto}
-.partner-kakao-banner small{display:block;font-weight:800;letter-spacing:.08em;margin-bottom:5px}
-.partner-kakao-banner h2{font-size:26px;line-height:1.3;margin:0 0 5px}
-.partner-kakao-banner p{margin:0;font-size:15px;opacity:.8}
-.partner-kakao-banner .kakao-banner-btn{background:#191919;color:#fff;text-decoration:none;padding:16px 24px;border-radius:12px;font-weight:800;white-space:nowrap}
-@media(max-width:760px){.partner-kakao-banner{margin:-28px auto 38px;padding:0 18px}.partner-kakao-banner .banner-inner{padding:24px;display:block}.partner-kakao-banner .banner-copy{align-items:flex-start}.partner-kakao-banner h2{font-size:21px}.partner-kakao-banner .kakao-banner-btn{display:block;text-align:center;margin-top:20px}.partner-kakao-banner .kakao-mark{width:48px;height:48px;font-size:18px}}
+/* Partner Kakao channel banner - HIGH LOGIS aligned */
+.partner-kakao-banner{max-width:1200px;margin:48px auto 10px;padding:0 5vw;box-sizing:border-box;position:relative;z-index:3}
+.partner-kakao-banner .banner-inner{background:#07182c;border-top:4px solid #0878e8;padding:26px 30px;display:flex;align-items:center;justify-content:space-between;gap:28px;box-shadow:0 12px 30px rgba(7,24,44,.10)}
+.partner-kakao-banner .banner-copy{display:flex;align-items:center;gap:18px;color:#fff}
+.partner-kakao-banner .kakao-mark{width:54px;height:54px;border-radius:8px;background:#fee500;color:#191919;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;flex:0 0 auto}
+.partner-kakao-banner small{display:block;color:#49aaff;font-weight:900;letter-spacing:1.5px;margin-bottom:5px}
+.partner-kakao-banner h2{font-size:24px;line-height:1.35;margin:0 0 5px;color:#fff}
+.partner-kakao-banner p{margin:0;font-size:14px;color:#b8c5d3}
+.partner-kakao-banner .kakao-banner-btn{background:#0878e8;color:#fff;text-decoration:none;padding:15px 22px;border-radius:4px;font-weight:900;white-space:nowrap}
+.compact-partner-form{max-width:900px}.simple-privacy{display:flex;justify-content:center;align-items:center;gap:9px;margin-top:28px;color:#0a1d34;font-weight:800}.simple-privacy input{width:18px;height:18px}.compact-partner-form .apply-submit{margin-top:26px}
+@media(max-width:760px){.partner-kakao-banner{margin:30px auto 0;padding:0 6vw}.partner-kakao-banner .banner-inner{padding:22px;display:block}.partner-kakao-banner .banner-copy{align-items:flex-start}.partner-kakao-banner h2{font-size:20px}.partner-kakao-banner .kakao-banner-btn{display:block;text-align:center;margin-top:18px}.partner-kakao-banner .kakao-mark{width:46px;height:46px;font-size:16px}.simple-privacy{justify-content:flex-start}}
