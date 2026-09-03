@@ -180,3 +180,31 @@
   .brand img{width:44px;height:46px}
   .cta{font-size:10px;padding:9px 8px}
 }
+
+/* RICH CONTACT FOOTER */
+.contact-rich{align-items:flex-start}
+.contact-rich .contact-main{max-width:820px}
+.contact-intro{margin:16px 0 24px;color:#53677d;font-size:16px;line-height:1.75}
+.contact-services{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 24px}
+.contact-services div{padding:17px 18px;background:#fff;border-top:3px solid #0878e8;box-shadow:0 6px 18px rgba(7,24,44,.06)}
+.contact-services b{display:block;color:#07182c;font-size:16px;margin-bottom:7px}
+.contact-services span{display:block;color:#64758a;font-size:12px;line-height:1.55}
+.contact-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.contact-actions a{text-decoration:none}
+.contact-actions .contact-phone{font-size:28px;font-weight:900;color:#0878e8}
+.contact-actions .contact-link{font-size:13px;font-weight:800;color:#07182c;background:#e9f2fb;padding:11px 14px;border-radius:4px}
+@media(max-width:800px){
+  .contact.contact-rich{display:block;text-align:left;padding:48px 7vw 50px}
+  .contact-rich>img{display:block;width:82px;height:auto;margin:0 0 20px}
+  .contact-rich .contact-main{max-width:none}
+  .contact-rich h2{font-size:29px;line-height:1.25;margin-bottom:12px}
+  .contact-intro{font-size:14px;line-height:1.75;margin:0 0 22px}
+  .contact-intro br{display:none}
+  .contact-services{grid-template-columns:1fr;gap:8px;margin-bottom:22px}
+  .contact-services div{padding:15px 16px}
+  .contact-services b{font-size:15px;margin-bottom:5px}
+  .contact-services span{font-size:12px;line-height:1.5}
+  .contact-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .contact-actions .contact-phone{grid-column:1/-1;display:block;font-size:26px;background:#07182c;color:#fff;padding:14px 16px;border-radius:4px;text-align:center}
+  .contact-actions .contact-link{display:block;text-align:center;padding:12px 8px;font-size:12px;background:#e9f2fb}
+}
