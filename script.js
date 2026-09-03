@@ -16,3 +16,8 @@ function resetHomeTop() {
 }
 window.addEventListener('pageshow', resetHomeTop);
 window.addEventListener('load', resetHomeTop);
+// 운송·기사 문의 선택 팝업
+const inquiryModal=document.getElementById('inquiryModal');
+document.querySelectorAll('.inquiry-open').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();inquiryModal?.classList.add('open');inquiryModal?.setAttribute('aria-hidden','false')}));
+inquiryModal?.querySelector('.inquiry-close')?.addEventListener('click',()=>{inquiryModal.classList.remove('open');inquiryModal.setAttribute('aria-hidden','true')});
+inquiryModal?.querySelector('.inquiry-backdrop')?.addEventListener('click',()=>{inquiryModal.classList.remove('open');inquiryModal.setAttribute('aria-hidden','true')});
