@@ -1,0 +1,313 @@
+
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>운임 계산 시스템 | HIGH LOGIS</title>
+<style>
+:root {
+  --navy:#102940;
+  --blue:#0878df;
+  --line:#dce5ee;
+  --bg:#f3f6fa;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  background:var(--bg);
+  color:#1c2d3d;
+  font-family:"Malgun Gothic",Arial,sans-serif;
+}
+header {
+  background:var(--navy);
+  color:white;
+  padding:18px max(20px,calc((100% - 1200px)/2));
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+}
+.brand {display:flex;align-items:center;gap:12px;}
+.brand img {width:43px;background:white;}
+.brand strong {font-size:21px;}
+header a {color:white;text-decoration:none;}
+main {max-width:1200px;margin:35px auto;padding:0 18px;}
+h1 {font-size:27px;margin-bottom:8px;}
+.subtitle {color:#65788b;margin-bottom:28px;}
+.panel {
+  background:white;
+  padding:25px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  margin-bottom:20px;
+}
+.panel h2 {font-size:19px;margin:0 0 20px;}
+.grid {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:15px;
+}
+label {display:block;font-size:13px;font-weight:bold;margin-bottom:7px;}
+input,select {
+  width:100%;
+  padding:12px;
+  border:1px solid #cbd7e3;
+  border-radius:7px;
+  font-size:15px;
+}
+input:focus {outline:2px solid #87bfff;}
+button {
+  padding:12px 19px;
+  border:0;
+  border-radius:7px;
+  cursor:pointer;
+  font-weight:bold;
+}
+.primary {background:var(--blue);color:white;}
+.secondary {background:#e8eff6;color:#163c5c;}
+.danger {background:#fff0f0;color:#b72b2b;}
+.actions {display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
+.table-wrap {overflow-x:auto;}
+table {width:100%;border-collapse:collapse;min-width:800px;}
+th {
+  background:#eaf1f7;
+  padding:13px 8px;
+  font-size:13px;
+}
+td {padding:10px 8px;border-bottom:1px solid var(--line);text-align:center;}
+td input {min-width:105px;}
+.summary {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:15px;
+}
+.stat {
+  background:#f0f5fa;
+  border-radius:9px;
+  padding:20px;
+}
+.stat small {display:block;color:#64788a;margin-bottom:10px;}
+.stat strong {font-size:24px;color:#103b62;}
+.notice {
+  background:#fff8e8;
+  padding:15px;
+  border-radius:8px;
+  color:#795c19;
+  font-size:13px;
+  line-height:1.8;
+}
+footer {text-align:center;color:#8190a0;padding:35px;}
+@media(max-width:800px) {
+  .grid,.summary {grid-template-columns:1fr 1fr;}
+}
+@media(max-width:500px) {
+  .grid,.summary {grid-template-columns:1fr;}
+  header {flex-wrap:wrap;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <img src="logo.png" alt="하이로지스">
+    <strong>HIGH LOGIS</strong>
+  </div>
+  <a href="index.html">홈페이지로 돌아가기 →</a>
+</header>
+
+<main>
+  <h1>운임 · 거리 계산 시스템</h1>
+  <p class="subtitle">HIGH LOGIS TRANSPORT CALCULATOR</p>
+
+  <div class="notice">
+    개발 중인 시험용 계산기입니다.
+    실제 거리·톨비·자동 운임은 아직 제공되지 않습니다.
+    입력한 데이터는 서버에 저장되지 않습니다.
+  </div>
+
+  <section class="panel">
+    <h2>차량 및 계산 기준</h2>
+    <div class="grid">
+      <div>
+        <label>차량 종류</label>
+        <select id="vehicle">
+          <option>5톤 윙바디</option>
+          <option>8.5톤</option>
+          <option>원쓰리</option>
+        </select>
+      </div>
+      <div>
+        <label>연비 (km/L)</label>
+        <input id="efficiency" type="number" value="4" min="0.1" step="0.1">
+      </div>
+      <div>
+        <label>경유 단가 (원/L)</label>
+        <input id="fuelPrice" type="number" value="1780" min="0">
+      </div>
+      <div>
+        <label>유가보조금 (원/L)</label>
+        <input id="subsidy" type="number" value="213" min="0">
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>운행 노선 입력</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>번호</th>
+            <th>상차지</th>
+            <th>하차지</th>
+            <th>거리(km)</th>
+            <th>운임(원)</th>
+            <th>톨비(원)</th>
+            <th>삭제</th>
+          </tr>
+        </thead>
+        <tbody id="routes"></tbody>
+      </table>
+    </div>
+    <div class="actions">
+      <button class="secondary" onclick="addRoute()">+ 노선 추가</button>
+      <button class="primary" onclick="calculate()">입력 금액 계산</button>
+      <button class="secondary" onclick="resetRoutes()">초기화</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>운행 수익 분석</h2>
+    <div class="summary">
+      <div class="stat">
+        <small>총 운행거리</small>
+        <strong id="distance">0 km</strong>
+      </div>
+      <div class="stat">
+        <small>총 운임</small>
+        <strong id="revenue">0원</strong>
+      </div>
+      <div class="stat">
+        <small>예상 유류비</small>
+        <strong id="fuelCost">0원</strong>
+      </div>
+      <div class="stat">
+        <small>총 톨비</small>
+        <strong id="toll">0원</strong>
+      </div>
+      <div class="stat">
+        <small>유류비·톨비 차감액</small>
+        <strong id="profit">0원</strong>
+      </div>
+      <div class="stat">
+        <small>운행 구간 수</small>
+        <strong id="routeCount">0건</strong>
+      </div>
+    </div>
+    <p style="font-size:12px;color:#718296;margin-top:18px;">
+      차감액에는 차량 할부금, 보험료, 지입료, 세금,
+      기타 운영비가 포함되지 않습니다.
+    </p>
+  </section>
+</main>
+
+<footer>
+  © HIGH LOGIS CO., LTD. ALL RIGHTS RESERVED.
+</footer>
+
+<script>
+const routes = document.getElementById("routes");
+
+function addRoute() {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td class="number"></td>
+    <td><input placeholder="상차지" aria-label="상차지"></td>
+    <td><input placeholder="하차지" aria-label="하차지"></td>
+    <td><input type="number" min="0" step="0.1" placeholder="직접 입력" aria-label="거리"></td>
+    <td><input type="number" min="0" placeholder="직접 입력" aria-label="운임"></td>
+    <td><input type="number" min="0" placeholder="직접 입력" aria-label="톨비"></td>
+    <td><button class="danger" onclick="removeRoute(this)">삭제</button></td>
+  `;
+  routes.appendChild(tr);
+  renumber();
+}
+
+function removeRoute(button) {
+  button.closest("tr").remove();
+  renumber();
+  calculate();
+}
+
+function renumber() {
+  [...routes.rows].forEach((row,i) => {
+    row.querySelector(".number").textContent = i+1;
+  });
+}
+
+function money(n) {
+  return Math.round(n).toLocaleString("ko-KR")+"원";
+}
+
+function getNumber(id) {
+  return Number(document.getElementById(id).value);
+}
+
+function calculate() {
+  let distance=0,revenue=0,toll=0;
+  let count=0;
+  let invalid=false;
+
+  [...routes.rows].forEach(row => {
+    const inputs=row.querySelectorAll("input");
+    const hasData=[...inputs].some(input => input.value.trim()!=="");
+    if (!hasData) return;
+
+    count++;
+    [3,4,5].forEach(i => {
+      if (inputs[i].value.trim()==="" ||
+          !Number.isFinite(Number(inputs[i].value)) ||
+          Number(inputs[i].value)<0) {
+        invalid=true;
+      }
+    });
+
+    distance+=Number(inputs[2].value);
+    revenue+=Number(inputs[3].value);
+    toll+=Number(inputs[4].value);
+  });
+
+  const efficiency=getNumber("efficiency");
+  const price=getNumber("fuelPrice");
+  const subsidy=getNumber("subsidy");
+
+  if (invalid || !Number.isFinite(efficiency) ||
+      efficiency<=0 || price<0 || subsidy<0 ||
+      !Number.isFinite(price) || !Number.isFinite(subsidy)) {
+    alert("거리·운임·톨비와 계산 기준을 올바르게 입력해 주세요.");
+    return;
+  }
+
+  const fuel=distance/efficiency*Math.max(0,price-subsidy);
+  const profit=revenue-fuel-toll;
+
+  document.getElementById("distance").textContent=distance.toLocaleString("ko-KR")+" km";
+  document.getElementById("revenue").textContent=money(revenue);
+  document.getElementById("fuelCost").textContent=money(fuel);
+  document.getElementById("toll").textContent=money(toll);
+  document.getElementById("profit").textContent=money(profit);
+  document.getElementById("routeCount").textContent=count+"건";
+}
+
+function resetRoutes() {
+  routes.innerHTML="";
+  addRoute();
+  calculate();
+}
+
+addRoute();
+</script>
+</body>
+</html>
