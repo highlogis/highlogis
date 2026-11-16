@@ -421,13 +421,14 @@ function pairLine(line){
 }
 function parse(text){
  const lines=text.split(/\r?\n/),result=[],issues=[],candidates=[];
- let pendingFrom='',pendingTo='',addressField='',pendingSingle='',group=1,hadRoute=false;
- const add=(a,b,i,raw)=>{if(!a||!b)return;result.push({from:a,to:b,line:i+1,raw,group});if(/왕복/.test(raw)){result.push({from:b,to:a,line:i+1,raw:raw+' [복귀]',group});}hadRoute=true};
+ let pendingFrom='',pendingTo='',addressField='',pendingSingle='',group=1,hadRoute=false,pendingRoundTrip=false;
+ const add=(a,b,i,raw)=>{if(!a||!b)return;result.push({from:a,to:b,line:i+1,raw,group});if(/왕복/.test(raw)||pendingRoundTrip){result.push({from:b,to:a,line:i+1,raw:raw+' [복귀]',group});}pendingRoundTrip=false;hadRoute=true};
  for(let i=0;i<lines.length;i++){
   let raw=clean(lines[i]);if(!raw)continue;
-  if(/^[-━─]{3,}$/.test(raw)){if(hadRoute){group++;hadRoute=false}continue}
-  if(/^\d[\d,]*\s*km\s*(?:\/|공차)/i.test(raw)){if(hadRoute){group++;hadRoute=false}continue}
+  if(/^[-━─]{3,}$/.test(raw)){pendingRoundTrip=false;if(hadRoute){group++;hadRoute=false}continue}
+  if(/^\d[\d,]*\s*km\s*(?:\/|공차)/i.test(raw)){pendingRoundTrip=false;if(hadRoute){group++;hadRoute=false}continue}
   if(/^\d{1,2}월\s*\d{1,2}일|^진행\s*부탁/.test(raw))continue;
+  if(/왕복(?:\s*회수|\s*운행|\s*노선)?/.test(raw) && (/^\s*(?:\d{1,2}시(?:\d{1,2}분)?|\d{1,2}:\d{2})/.test(raw) || /^\s*[（(]?왕복(?:\s*회수|\s*운행|\s*노선)?[）)]?\s*$/.test(raw))){pendingRoundTrip=true;continue;}
   const label=raw.match(/^(상차지|하차지)\s*[:：]?\s*(.*)$/);
   if(label){const name=place(label[2]);if(label[1]==='상차지'){pendingFrom=name;addressField='from'}else{pendingTo=name;addressField='to'};if(pendingFrom&&pendingTo){add(pendingFrom,pendingTo,i,raw);pendingFrom='';pendingTo=''}continue}
   if(isAddress(raw)){if(addressField&&result.length){const last=result[result.length-1];if(last&&last.group===group)candidates.push({name:addressField==='from'?last.from:last.to,address:raw,line:i+1})}continue}
