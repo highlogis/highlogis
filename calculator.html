@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html lang="ko"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>HIGH LOGIS | 운임 계산기 (홈페이지용 53차)</title>
+<html lang="ko"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>HIGH LOGIS | 운임 계산기 (홈페이지용 56차)</title>
 <style>
 :root{font-family:system-ui,-apple-system,'Malgun Gothic',sans-serif;color:#14243c;background:#f4f7fb}*{box-sizing:border-box}body{margin:0}header{background:#102c50;color:white;padding:19px max(20px,calc((100vw - 1100px)/2));font-size:22px;font-weight:800;letter-spacing:.05em}main{max-width:1100px;margin:28px auto;padding:0 16px 45px}h1{font-size:27px;margin:0 0 10px}h2{font-size:18px;margin:0 0 16px}.muted{color:#65748b;font-size:13px}.notice{background:#fff8e8;border:1px solid #f4d78d;border-radius:10px;padding:13px 16px;margin:18px 0}.panel{background:white;border:1px solid #e3e9f1;border-radius:14px;padding:22px;margin:17px 0;box-shadow:0 3px 15px #152b4c08}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.field label{display:block;font-size:13px;font-weight:650;margin-bottom:7px}input,select{width:100%;padding:11px 10px;border:1px solid #cbd5e1;border-radius:8px;font:inherit;font-size:14px;background:white}input:focus,select:focus{outline:2px solid #8fb9e7;border-color:#3476b9}.radio{display:flex;gap:22px;flex-wrap:wrap}.radio label{display:flex;align-items:center;gap:8px;font-weight:600}.radio input{width:auto}.route{display:grid;grid-template-columns:1fr 1fr 115px 115px 115px 100px 42px;gap:8px;align-items:end;padding:12px 0;border-bottom:1px solid #e7edf4}.route .field label{font-size:12px}.route-tools{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.route-tools .tool-buttons{display:flex;gap:5px}.route-tools button{font-size:12px;padding:6px 9px}.route-index{font-size:13px;font-weight:800;color:#174a7b}.insert-after{grid-column:1/-1;justify-self:start;font-size:12px;padding:6px 10px!important}.route-gap{grid-column:1/-1;font-size:12px;color:#64748b;background:#f5f8fc;border-radius:6px;padding:7px 10px}.route .remove{padding:9px 0}.route input{padding:9px 8px}.route .remove{padding:9px 0}.btn{border:0;background:#164f8c;color:#fff;border-radius:8px;padding:11px 17px;font-weight:700;cursor:pointer}.btn.secondary{background:#e9f1f9;color:#174a7b}.btn.danger{background:#fff0ef;color:#ad3838}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}.results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.metric{padding:15px;background:#f3f7fc;border-radius:10px}.metric small{display:block;color:#66758a;margin-bottom:7px}.metric strong{font-size:21px;overflow-wrap:anywhere}.highlight{background:#e9f3ff}.highlight strong{color:#124d89}.hide{display:none!important}.right{text-align:right}@media(max-width:850px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.route{grid-template-columns:repeat(2,minmax(0,1fr))}.route .remove{grid-column:2}.results{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:500px){.grid,.results{grid-template-columns:1fr}.panel{padding:16px}h1{font-size:23px}}
 .lookup{position:relative}.suggest{position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #cbd5e1;box-shadow:0 6px 18px #0002;z-index:20;max-height:140px;overflow:auto}.suggest button{display:block;width:100%;text-align:left;border:0;background:white;padding:9px;cursor:pointer}.suggest button:hover{background:#eaf2fb}.status{font-size:12px;color:#64748b;margin-top:4px}.status.bad{color:#b45309}.status.good{color:#166534}</style><style>.bulkarea{width:100%;min-height:155px;padding:12px;border:1px solid #cbd5e1;border-radius:9px;font:14px/1.65 monospace;resize:vertical}.preview{margin-top:12px;overflow:auto}.preview table{width:100%;border-collapse:collapse;font-size:13px}.preview td,.preview th{border-bottom:1px solid #e3e9f1;padding:8px;text-align:left}.warn{color:#a45b00}.ok{color:#166534}</style><style>
@@ -250,13 +250,16 @@ function shareSameAddressCoords(){
  const addressKey=a=>String(a||'').normalize('NFKC').replace(/\s+/g,'').replace(/[，,。.]$/,'').toLowerCase();
  const groups=new Map();
  for(const p of PRIVATE_DB.places){const k=addressKey(p.address);if(!k)continue;if(!groups.has(k))groups.set(k,[]);groups.get(k).push(p)}
+ const distanceMeters=(a,b)=>{const rad=Math.PI/180;const dLat=(Number(b.lat)-Number(a.lat))*rad;const dLon=(Number(b.lon)-Number(a.lon))*rad;const h=Math.sin(dLat/2)**2+Math.cos(Number(a.lat)*rad)*Math.cos(Number(b.lat)*rad)*Math.sin(dLon/2)**2;return 12742000*Math.asin(Math.min(1,Math.sqrt(h)))};
  let shared=0,conflicts=0;
  for(const group of groups.values()){
   const sources=group.filter(coordReady);
   if(!sources.length)continue;
-  // 같은 주소라도 기존 좌표가 서로 다른 경우 자동 공유를 보류합니다.
-  const unique=new Map();for(const p of sources){const key=Number(p.lat).toFixed(5)+','+Number(p.lon).toFixed(5);unique.set(key,p)}
-  if(unique.size!==1){conflicts++;continue}
+  // 같은 주소에 좌표가 여러 개 있어도 모두 30m 이내이면 동일 진입지점으로 취급.
+  // 30m 이상 벌어지면 오배정 위험이 있어 자동 공유하지 않음.
+  let conflict=false;
+  for(let i=0;i<sources.length&&!conflict;i++)for(let j=i+1;j<sources.length;j++)if(distanceMeters(sources[i],sources[j])>30){conflict=true;break}
+  if(conflict){conflicts++;continue}
   const source=sources[0];
   for(const p of group){if(coordReady(p))continue;p.lat=Number(source.lat);p.lon=Number(source.lon);p._sharedCoordinateFrom=source.name;shared++}
  }
