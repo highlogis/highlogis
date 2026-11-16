@@ -244,7 +244,26 @@ let coordOverrides={};
 try {const saved=JSON.parse(localStorage.getItem(COORD_KEY)||'{}');if(saved&&typeof saved==='object'&&!Array.isArray(saved))coordOverrides=saved;}catch(e){}
 function applyCoords(){for(const p of PRIVATE_DB.places){const v=coordOverrides[p.name];if(v&&Number.isFinite(+v.lat)&&Number.isFinite(+v.lon)&&+v.lat>=33&&+v.lat<=39.5&&+v.lon>=124&&+v.lon<=132){p.lat=+v.lat;p.lon=+v.lon;}}}
 applyCoords();
-function saveCoords(){localStorage.setItem(COORD_KEY,JSON.stringify(coordOverrides));applyCoords();refreshCoordStats()}
+// 55차: 동일한 등록 주소에 검증된 좌표가 하나로 일치할 때만 좌표 공유.
+// 원본 거점명·주소 및 브라우저 보정값은 덮어쓰지 않습니다.
+function shareSameAddressCoords(){
+ const addressKey=a=>String(a||'').normalize('NFKC').replace(/\s+/g,'').replace(/[，,。.]$/,'').toLowerCase();
+ const groups=new Map();
+ for(const p of PRIVATE_DB.places){const k=addressKey(p.address);if(!k)continue;if(!groups.has(k))groups.set(k,[]);groups.get(k).push(p)}
+ let shared=0,conflicts=0;
+ for(const group of groups.values()){
+  const sources=group.filter(coordReady);
+  if(!sources.length)continue;
+  // 같은 주소라도 기존 좌표가 서로 다른 경우 자동 공유를 보류합니다.
+  const unique=new Map();for(const p of sources){const key=Number(p.lat).toFixed(5)+','+Number(p.lon).toFixed(5);unique.set(key,p)}
+  if(unique.size!==1){conflicts++;continue}
+  const source=sources[0];
+  for(const p of group){if(coordReady(p))continue;p.lat=Number(source.lat);p.lon=Number(source.lon);p._sharedCoordinateFrom=source.name;shared++}
+ }
+ return {shared,conflicts};
+}
+shareSameAddressCoords();
+function saveCoords(){localStorage.setItem(COORD_KEY,JSON.stringify(coordOverrides));applyCoords();shareSameAddressCoords();refreshCoordStats()}
 function refreshCoordStats(){document.querySelectorAll(".route").forEach(r=>r.dispatchEvent(new Event("highlogis:refresh38")));const all=PRIVATE_DB.places.length,done=PRIVATE_DB.places.filter(coordReady).length;const el=document.getElementById('coordStats');if(el)el.textContent=`좌표 등록 ${done}/${all}개 · 미등록 ${all-done}개 · 이 브라우저의 보정 ${Object.keys(coordOverrides).length}개`}
 const coordPanel=document.createElement('section');coordPanel.className='panel';coordPanel.innerHTML=`<h2>거점 좌표 등록 · 백업 (7차)</h2><p class="muted">주소로 좌표를 1건씩 조회합니다. 자동 조회 결과는 실제 거점 위치인지 확인한 뒤 저장하세요. 저장값은 현재 브라우저에만 유지되므로 JSON 백업도 다운로드하세요.</p><p id="coordStats"></p><div class="grid"><div class="field"><label>거점명 (정확한 DB 이름)</label><input id="coordName" list="coordNames" placeholder="예: 시흥1"><datalist id="coordNames"></datalist></div><div class="field"><label>등록 주소</label><input id="coordAddress" placeholder="주소"></div><div class="field"><label>위도 (latitude)</label><input id="coordLat" type="number" step="any" placeholder="37.000000"></div><div class="field"><label>경도 (longitude)</label><input id="coordLon" type="number" step="any" placeholder="127.000000"></div></div><div class="actions"><button class="btn secondary" id="coordLoad">거점 불러오기</button><button class="btn secondary" id="coordFind">주소 좌표 조회 / 재검색</button><button class="btn" id="coordSave">좌표 저장</button><button class="btn secondary" id="coordExport">좌표 JSON 백업</button><button class="btn secondary" id="coordImport">JSON 복원</button><input type="file" id="coordFile" accept=".json,application/json" style="display:none"></div><p class="status" id="coordMessage" aria-live="polite"></p>`;
 // 5차: 현재 노선에 사용되는 미등록 좌표를 바로 선택하는 작업 목록.
@@ -334,7 +353,7 @@ function setupLookup(row){
    status.className='status '+(p?'good':'bad');
    if(p){
     const addr=document.createElement('div');addr.textContent='주소: '+(p.address||'미등록');detail.appendChild(addr);
-    const coords=document.createElement('div');coords.textContent=coordReady(p)?'좌표: '+Number(p.lat).toFixed(6)+', '+Number(p.lon).toFixed(6):'좌표: 미등록';detail.appendChild(coords);
+    const coords=document.createElement('div');coords.textContent=coordReady(p)?'좌표: '+Number(p.lat).toFixed(6)+', '+Number(p.lon).toFixed(6)+(p._sharedCoordinateFrom?' (동일 주소 · '+p._sharedCoordinateFrom+' 좌표 공유)':''):'좌표: 미등록';detail.appendChild(coords);
     if(!coordReady(p))detail.classList.add('missing38');else detail.classList.remove('missing38');
    }else{detail.classList.remove('missing38')}
    if(q.length<1){box.classList.add('hide');return}
