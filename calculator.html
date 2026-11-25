@@ -365,7 +365,7 @@ function setupLookup(row){
   function render(){
    const q=normalized(input.value),p=resolve(input.value);
    box.replaceChildren();detail.replaceChildren();
-   status.textContent=p?(p.temporary?'주소 좌표 조회 완료 · 임시 사용':'거점 DB 연결 완료'):addressPending.has(q)?'주소 좌표 조회 중...':addressErrors.has(q)?addressErrors.get(q):q?(looksLikeAddress(input.value)?'주소 입력 · 계산 시 좌표 조회':'미등록 거점 · 직접 확인 필요'):'거점명 또는 주소를 입력하세요';
+   status.textContent=p?(p.temporary?'주소 좌표 조회 완료 · 임시 사용':'거점 DB 연결 완료'):addressPending.has(q)?'주소 좌표 조회 중...':addressErrors.has(q)?addressErrors.get(q):q?(looksLikeAddress(input.value)?'주소 입력 · 계산 시 좌표 조회':'미등록 거점 · 직접 확인 필요'):(input.dataset.missingName?'미등록 거점: '+input.dataset.missingName+' · 주소를 입력하세요':'거점명 또는 주소를 입력하세요');
    status.className='status '+(p?'good':'bad');
    if(p){
     const addr=document.createElement('div');addr.textContent='주소: '+(p.address||'미등록');detail.appendChild(addr);
@@ -427,6 +427,7 @@ $('autoDistance').addEventListener('click',async()=>{const btn=$('autoDistance')
 $('lookupSummary').textContent=`내부 테스트 데이터: 거점 ${PRIVATE_DB.places.length.toLocaleString()}개 · 별칭 ${Object.keys(PRIVATE_DB.aliases).length.toLocaleString()}개. 이 파일은 외부 공개 금지.`;
 window.highlogisCalculate=()=>calculate();
 window.highlogisCoords={getOverrides:()=>coordOverrides,save:saveCoords,refresh:refreshCoordStats,updateMissing:()=>updateMissingList()};
+$('calculate').addEventListener('click',e=>{const blanks=[...document.querySelectorAll('.route .from,.route .to')].filter(input=>!input.value.trim());if(blanks.length){e.stopImmediatePropagation();alert('상차지 또는 하차지 주소를 입력하세요.');blanks[0].focus();}},true);
 $('add').addEventListener('click' ,()=>addRoute());$('calculate').addEventListener('click',()=>{calculate();$('autoDistance').click()});$('reset').addEventListener('click',()=>{if(!confirm('모든 입력값을 초기화할까요?'))return;$('routes').innerHTML='';$('dailyFare').value=700000;$('days').value=25;$('efficiency').value=4;$('diesel').value=1780;$('subsidy').value=213;$('monthlyFixed').value=0;document.querySelector('input[name="mode"][value="daily"]').checked=true;$('nonFixedRoute').checked=true;$('routeTypeHelp').textContent='비고정노선: 마지막 복귀 공차는 계산하지 않습니다. 노선 사이 공차는 계산합니다.';addRoute();syncMode()});document.querySelectorAll('input[name="mode"]').forEach(el=>el.addEventListener('change',syncMode));['dailyFare','days','efficiency','diesel','subsidy','monthlyFixed','commissionRate70'].forEach(id=>$(id).addEventListener('input',calculate));addRoute();})();
 </script><script>
 (()=>{'use strict';
@@ -443,7 +444,7 @@ function isTime(s){return /^(?:\d{1,2})(?:시|:\d{2})(?:\d{1,2}분|\d{2})?\s*(?:
 function isAddress(s){return /^(?:서울|경기|인천|부산|대구|대전|광주|울산|세종|충북|충남|전북|전남|경북|경남|강원|제주)(?:도|광역시|특별시|시)?\s/.test(s)||/\b(?:로|길)\s*\d+/.test(s)}
 function isNoise(s){return /^(?:진행\s*부탁|금액협상|간선\s*\d|루트\s*번호|호차|층수|상차링크|하차링크|\d{1,2}월\s*\d{1,2}일|하차후|\[.*\]\s*\[.*\])/.test(s)||/^(?:\d[\d,]*\s*km\s*\/|\d[\d,]*\s*km\s+공차)/i.test(s)||/^[-━─]{3,}$/.test(s)}
 function stripPrefix(s){return s.replace(/^\[[^\]]+\]\s*\[(?:오전|오후)\s*\d+:\d+\]\s*/,'').replace(/^\d{1,2}(?:시|:\d{2})(?:\d{1,2}분)?\s*(?:상차|접안|출차|부터\s*상차가능)?\s*[-–:]?\s*/,'').replace(/^(?:가는대로\s*상차|가는대로상차|가는데로\s*(?:상차|접안)?|가는데\s*로\s*(?:상차|접안)?|\d{1,2}시\s*접안|\d{1,2}시\s*상차)\s*[-–:]?\s*/,'').trim()}
-function pairLine(line){
+function pairLine(line,afterTime=false){
  let s=stripPrefix(line).replace(/\s+(?:\d{1,2}시(?:-\d{1,2}시)?(?:출차)?|\d{1,2}시-바로출차|바로출차|\d{1,2}:\d{2})\s*$/,'').trim();
  if(!s||isAddress(s)||isNoise(s)||/^(?:상차지|하차지)\s*[:：]/.test(s))return null;
  const via=/경유/.test(s);
@@ -456,13 +457,13 @@ function pairLine(line){
   for(let j=parts.length;j>i;j--){const chunk=parts.slice(i,j);if(chunk.some(x=>/^(?:경유|\d+층)$/.test(x)))continue;const k=canonical(chunk.join(' '));if(k){names.push(k);i=j-1;found=true;break;}}
   if(!found){names.push(place(parts[i]));unknown.push(parts[i]);}
  }
- if(names.length>=2&&(via||/왕복/.test(line)||names.length===2&&(!unknown.length||/^\d{1,2}(?:시|:)/.test(line))||s.includes('\t')||s.includes('→')||s.includes('->')))return {names,extra:via&&names.length===2?2:0};
+ if(names.length>=2&&(via||/왕복/.test(line)||names.length===2&&(!unknown.length||afterTime||/^\d{1,2}(?:시|:)/.test(line)||/\s{2,}/.test(s))||s.includes('\t')||s.includes('→')||s.includes('->')))return {names,extra:via&&names.length===2?2:0};
 
  return null;
 }
 function parse(text){
  const lines=text.split(/\r?\n/),result=[],issues=[],candidates=[];
- let pendingFrom='',pendingTo='',addressField='',pendingSingle='',group=1,hadRoute=false,pendingRoundTrip=false;
+ let pendingFrom='',pendingTo='',addressField='',pendingSingle='',group=1,hadRoute=false,pendingRoundTrip=false,pendingTime=false;
  const add=(a,b,i,raw,extra=0)=>{if(!a||!b)return;result.push({from:a,to:b,line:i+1,raw,group,extra});if(/왕복/.test(raw)||pendingRoundTrip){result.push({from:b,to:a,line:i+1,raw:raw+' [복귀]',group});}pendingRoundTrip=false;hadRoute=true};
  for(let i=0;i<lines.length;i++){
   let raw=clean(lines[i]);if(!raw)continue;
@@ -475,7 +476,8 @@ function parse(text){
   if(isAddress(raw)){if(addressField&&result.length){const last=result[result.length-1];if(last&&last.group===group)candidates.push({name:addressField==='from'?last.from:last.to,address:raw,line:i+1})}continue}
   if(isNoise(raw))continue;
   if(/^왕복(?:\s*(?:운행|노선))?$/.test(raw)&&result.length){const prev=result[result.length-1];if(prev.group===group){result.push({from:prev.to,to:prev.from,line:i+1,raw:raw+' [복귀]',group});hadRoute=true;}continue;}
-  const pair=pairLine(raw);if(pair){for(let j=0;j<pair.names.length-1;j++)add(pair.names[j],pair.names[j+1],i,raw,pair.extra);pendingSingle='';addressField='';continue}
+  if(/^\d{1,2}(?:시(?:\d{1,2}분)?|:\d{2})\s*(?:접안|상차|출차)?\s*(?:\([^)]*\))?$/.test(raw)){pendingTime=true;continue;}
+  const pair=pairLine(raw,pendingTime);pendingTime=false;if(pair){for(let j=0;j<pair.names.length-1;j++)add(pair.names[j],pair.names[j+1],i,raw,pair.extra);pendingSingle='';addressField='';continue}
   const stripped=stripPrefix(raw);
   const maybe=canonical(stripped);
   if(maybe){if(pendingSingle){add(pendingSingle,maybe,i,raw);pendingSingle=''}else pendingSingle=maybe;continue}
@@ -510,8 +512,8 @@ $('applyBulk').addEventListener('click',()=>{
  const unknown=[...new Set(selected.flatMap(r=>[r.from,r.to]).filter(v=>!canonical(v)))];
  const warning=unknown.length?`\n\n미등록 거점 ${unknown.length}개: ${unknown.slice(0,8).join(', ')}${unknown.length>8?' 외':''}\n적용 후 주소와 좌표를 확인해야 합니다.`:'';
  if(!confirm(`인식된 ${selected.length}개 구간으로 현재 노선 목록을 교체할까요?${warning}`))return;
- document.querySelector('#routes').replaceChildren();selected.forEach(r=>{document.querySelector('#add').click();const row=[...document.querySelectorAll('.route')].at(-1);row.querySelector('.from').value=r.from;row.querySelector('.to').value=r.to;row.dataset.bulkExtraKm=String(r.extra||0);row.querySelector('.from').dispatchEvent(new Event('input',{bubbles:true}));row.querySelector('.to').dispatchEvent(new Event('input',{bubbles:true}))});
- document.querySelector('#calculate').click();$('bulkStatus').textContent=`${selected.length}개 노선을 원문 순서대로 적용했습니다. 거점·경유지 확인 후 거리 조회를 실행하세요.${unknown.length?' 미등록 거점 '+unknown.length+'개 확인 필요.':''}`;
+ document.querySelector('#routes').replaceChildren();selected.forEach(r=>{document.querySelector('#add').click();const row=[...document.querySelectorAll('.route')].at(-1);for(const cls of ['from','to']){const input=row.querySelector('.'+cls);const name=r[cls];if(canonical(name)){input.value=name;}else{input.value='';input.dataset.missingName=name;input.placeholder='주소를 입력하세요';}}row.dataset.bulkExtraKm=String(r.extra||0);row.querySelector('.from').dispatchEvent(new Event('input',{bubbles:true}));row.querySelector('.to').dispatchEvent(new Event('input',{bubbles:true}))});
+ if(!unknown.length)document.querySelector('#calculate').click();$('bulkStatus').textContent=`${selected.length}개 노선을 원문 순서대로 적용했습니다. 거점·경유지 확인 후 거리 조회를 실행하세요.${unknown.length?' 미등록 거점 '+unknown.length+'개 확인 필요.':''}`;
 });
 })();
 </script>
