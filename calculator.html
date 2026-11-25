@@ -247,7 +247,10 @@ try { const added=JSON.parse(localStorage.getItem(NEW_PLACES_KEY)||'[]');
 }catch(e){console.warn('신규 거점 복원 오류',e)}
 function persistNewPlace(p){let added=[];try{added=JSON.parse(localStorage.getItem(NEW_PLACES_KEY)||'[]')}catch(e){};if(!Array.isArray(added))added=[];added=added.filter(x=>x.name!==p.name);added.push({name:p.name,address:p.address,lat:p.lat,lon:p.lon});localStorage.setItem(NEW_PLACES_KEY,JSON.stringify(added));}
 const normalized=s=>String(s||'').replace(/\s/g,'').toLowerCase();const placeMap=new Map(PRIVATE_DB.places.map(p=>[normalized(p.name),p]));const aliasMap=new Map(Object.entries(PRIVATE_DB.aliases).map(([a,b])=>[normalized(a),b]));
-function resolve(s){const key=normalized(s);return placeMap.get(key)||placeMap.get(normalized(aliasMap.get(key)||''))||null}
+const temporaryAddresses=new Map(), addressPending=new Map(), addressErrors=new Map();
+function resolve(s){const key=normalized(s);return placeMap.get(key)||placeMap.get(normalized(aliasMap.get(key)||''))||temporaryAddresses.get(key)||null}
+function looksLikeAddress(s){return /[가-힣]+(?:로|길|동|리|가|읍|면)\s*(?:산\s*)?\d+(?:-\d+)?(?:\s|$|\()/.test(String(s).trim())}
+async function lookupTemporaryAddress(value){const address=String(value||'').trim(),key=normalized(address);if(resolve(address)||!looksLikeAddress(address))return;if(addressPending.has(key))return addressPending.get(key);addressErrors.delete(key);const job=(async()=>{try{const resp=await hlApiFetch('/api/geocode',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({addresses:[{name:address,address}]})});const data=await resp.json();if(!resp.ok)throw Error(data.error||resp.status);const x=(data.results||[]).find(r=>r.name===address);if(!x||x.autoSaveEligible!==true||!coordReady(x)||+x.lat<33||+x.lat>39.5||+x.lon<124||+x.lon>132)throw Error('주소 확인 필요 (검색 실패 또는 복수 후보)');temporaryAddresses.set(key,{name:address,address:x.matchedAddress||address,lat:+x.lat,lon:+x.lon,temporary:true});}catch(e){addressErrors.set(key,String(e.message||e));}})();addressPending.set(key,job);try{await job}finally{addressPending.delete(key);for(const row of document.querySelectorAll('.route'))row.dispatchEvent(new Event('highlogis:refresh38'));}}
 // 4차: 브라우저별 좌표 보정값. 원본 577개 거점과 별칭은 변경하지 않음.
 const COORD_KEY='highlogis_coordinates_v4';
 let coordOverrides={};
@@ -362,7 +365,7 @@ function setupLookup(row){
   function render(){
    const q=normalized(input.value),p=resolve(input.value);
    box.replaceChildren();detail.replaceChildren();
-   status.textContent=p?'거점 DB 연결 완료':q?'미등록 거점 · 직접 확인 필요':'거점을 입력하세요';
+   status.textContent=p?(p.temporary?'주소 좌표 조회 완료 · 임시 사용':'거점 DB 연결 완료'):addressPending.has(q)?'주소 좌표 조회 중...':addressErrors.has(q)?addressErrors.get(q):q?(looksLikeAddress(input.value)?'주소 입력 · 계산 시 좌표 조회':'미등록 거점 · 직접 확인 필요'):'거점명 또는 주소를 입력하세요';
    status.className='status '+(p?'good':'bad');
    if(p){
     const addr=document.createElement('div');addr.textContent='주소: '+(p.address||'미등록');detail.appendChild(addr);
@@ -373,13 +376,13 @@ function setupLookup(row){
    document.querySelectorAll('.suggest').forEach(other=>{if(other!==box)other.classList.add('hide')});
    const seen=new Set(), candidates=[];
    const push=(item)=>{if(item&&!seen.has(item.name)){seen.add(item.name);candidates.push(item)}};
-   push(p);
+   if(!p?.temporary)push(p);
    for(const item of PRIVATE_DB.places){if(normalized(item.name).includes(q)){push(item);if(candidates.length>=8)break}}
    if(candidates.length<8){for(const [alias,target] of aliasMap){if(alias.includes(q)){push(placeMap.get(normalized(target)));if(candidates.length>=8)break}}}
    for(const item of candidates){const b=document.createElement('button');b.type='button';b.textContent=item.name+' · '+(item.address||'주소 미등록')+(coordReady(item)?' · 좌표 있음':' · 좌표 없음');b.addEventListener('mousedown',e=>e.preventDefault());b.addEventListener('click',()=>{input.value=item.name;box.classList.add('hide');render();calculate();refreshRouteOrder();invalidateEmptyDistances(row,cls)});box.appendChild(b)}
    box.classList.toggle('hide',candidates.length===0);
   }
-  input.addEventListener('input',render);input.addEventListener('blur',()=>setTimeout(()=>box.classList.add('hide'),160));input.addEventListener('focus',render);render();
+  input.addEventListener('input',render);input.addEventListener('blur',()=>{setTimeout(()=>box.classList.add('hide'),160);const value=input.value;if(!resolve(value)&&looksLikeAddress(value)){lookupTemporaryAddress(value);render();}});input.addEventListener('focus',render);render();
   row.addEventListener('highlogis:refresh38',render);
  }
 }
@@ -420,7 +423,7 @@ async function routeDistance(a,b){
  return data.distanceKm;
 }
 document.querySelectorAll('input[name="routeType"]').forEach(el=>el.addEventListener('change',()=>{invalidateEmptyDistances();refreshRouteOrder();$('routeTypeHelp').textContent=$('returnToStart').checked?'고정노선: 마지막 하차지에서 첫 번째 상차지까지 복귀 공차를 자동 계산합니다.':'비고정노선: 마지막 복귀 공차는 계산하지 않습니다. 노선 사이 공차는 계산합니다.';calculate()}));
-$('autoDistance').addEventListener('click',async()=>{const btn=$('autoDistance');btn.disabled=true;btn.textContent='거리 조회 중...';let ok=0;let failures=[];try{checkCoords();const rows=[...document.querySelectorAll('.route')];for(let i=0;i<rows.length;i++){const row=rows[i];const a=resolve(row.querySelector('.from').value),b=resolve(row.querySelector('.to').value);if(!coordReady(a)||!coordReady(b)){failures.push((i+1)+'번 적재: 거점 또는 좌표 없음');continue}try{row.querySelector('.km').value=Number(await routeDistance(a,b))+Number(row.dataset.bulkExtraKm||0);ok++}catch(e){failures.push((i+1)+'번 적재: '+(e instanceof TypeError?'공개 거리 API 서버 미연결':e.message))}if(i<rows.length-1||$('returnToStart').checked){const c=resolve((i<rows.length-1?rows[i+1]:rows[0]).querySelector('.from').value);const buildingKm=sameBuildingEmptyKm(b,c);if(buildingKm!==null){row.querySelector('.empty').value=buildingKm;ok++;continue}if(!coordReady(c)){failures.push((i+1)+'번 공차: 다음 상차지 좌표 없음');continue}try{row.querySelector('.empty').value=await routeDistance(b,c);ok++}catch(e){failures.push((i+1)+'번 공차: '+(e instanceof TypeError?'공개 거리 API 서버 미연결':e.message))}}else row.querySelector('.empty').value=0}calculate();alert((failures.length?'거리 자동 조회 일부/전체 실패. 기존 입력값으로 수익을 계산했습니다.\n':'거리 자동 조회 완료.\n')+'조회 처리 '+ok+'개 구간 (동일 좌표·공차 간소화 포함)'+(failures.length?'\n미조회: '+failures.join(' / '):'' )+'\n실제 도로거리 조회는 공개 API 서버가 연결되어야 합니다. 동일 좌표 0km 처리는 서버 조회 성공이 아닙니다. 일반차량 경로는 화물차 통행 제한을 반영하지 않습니다.')}catch(e){alert('거리 조회 오류: '+e.message)}finally{btn.disabled=false;btn.textContent='거리 자동 조회 (일반차량 기준)'}});
+$('autoDistance').addEventListener('click',async()=>{const btn=$('autoDistance');btn.disabled=true;btn.textContent='거리 조회 중...';let ok=0;let failures=[];try{const rows=[...document.querySelectorAll('.route')];for(const value of new Set(rows.flatMap(r=>['.from','.to'].map(c=>r.querySelector(c).value.trim()))))await lookupTemporaryAddress(value);checkCoords();for(let i=0;i<rows.length;i++){const row=rows[i];const a=resolve(row.querySelector('.from').value),b=resolve(row.querySelector('.to').value);if(!coordReady(a)||!coordReady(b)){failures.push((i+1)+'번 적재: 거점 또는 좌표 없음');continue}try{row.querySelector('.km').value=Number(await routeDistance(a,b))+Number(row.dataset.bulkExtraKm||0);ok++}catch(e){failures.push((i+1)+'번 적재: '+(e instanceof TypeError?'공개 거리 API 서버 미연결':e.message))}if(i<rows.length-1||$('returnToStart').checked){const c=resolve((i<rows.length-1?rows[i+1]:rows[0]).querySelector('.from').value);const buildingKm=sameBuildingEmptyKm(b,c);if(buildingKm!==null){row.querySelector('.empty').value=buildingKm;ok++;continue}if(!coordReady(c)){failures.push((i+1)+'번 공차: 다음 상차지 좌표 없음');continue}try{row.querySelector('.empty').value=await routeDistance(b,c);ok++}catch(e){failures.push((i+1)+'번 공차: '+(e instanceof TypeError?'공개 거리 API 서버 미연결':e.message))}}else row.querySelector('.empty').value=0}calculate();alert((failures.length?'거리 자동 조회 일부/전체 실패. 기존 입력값으로 수익을 계산했습니다.\n':'거리 자동 조회 완료.\n')+'조회 처리 '+ok+'개 구간 (동일 좌표·공차 간소화 포함)'+(failures.length?'\n미조회: '+failures.join(' / '):'' )+'\n실제 도로거리 조회는 공개 API 서버가 연결되어야 합니다. 동일 좌표 0km 처리는 서버 조회 성공이 아닙니다. 일반차량 경로는 화물차 통행 제한을 반영하지 않습니다.')}catch(e){alert('거리 조회 오류: '+e.message)}finally{btn.disabled=false;btn.textContent='거리 자동 조회 (일반차량 기준)'}});
 $('lookupSummary').textContent=`내부 테스트 데이터: 거점 ${PRIVATE_DB.places.length.toLocaleString()}개 · 별칭 ${Object.keys(PRIVATE_DB.aliases).length.toLocaleString()}개. 이 파일은 외부 공개 금지.`;
 window.highlogisCalculate=()=>calculate();
 window.highlogisCoords={getOverrides:()=>coordOverrides,save:saveCoords,refresh:refreshCoordStats,updateMissing:()=>updateMissingList()};
