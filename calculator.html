@@ -477,7 +477,15 @@ function parse(text){
   if(isNoise(raw))continue;
   if(/^왕복(?:\s*(?:운행|노선))?$/.test(raw)&&result.length){const prev=result[result.length-1];if(prev.group===group){result.push({from:prev.to,to:prev.from,line:i+1,raw:raw+' [복귀]',group});hadRoute=true;}continue;}
   if(/^\d{1,2}(?:시(?:\d{1,2}분)?|:\d{2})\s*(?:접안|상차|출차)?\s*(?:\([^)]*\))?$/.test(raw)){pendingTime=true;continue;}
-  const pair=pairLine(raw,pendingTime);pendingTime=false;if(pair){for(let j=0;j<pair.names.length-1;j++)add(pair.names[j],pair.names[j+1],i,raw,pair.extra);pendingSingle='';addressField='';continue}
+  // 숫자형 시간 및 시간 없는 배차 제목만 추가 인식 (기존 분석 경로 유지)
+  const compact=raw.match(/^(?:(?:[0-3]?\d)[0-5]\d(?=\s|$)|재고이관(?=\s|$)|부자재(?=\s|$)|가는\s*대로(?=\s|$))\s*(?:접안|상차|출차)?\s*/);
+  let pairInput=raw;
+  if(compact){
+   pairInput=raw.slice(compact[0].length).trim().replace(/\s*\(일요일\s*[Xx×]\)\s*$/,'').trim();
+   if(!pairInput){pendingTime=true;continue;}
+   pendingTime=true;
+  }
+  const pair=pairLine(pairInput,pendingTime);pendingTime=false;if(pair){for(let j=0;j<pair.names.length-1;j++)add(pair.names[j],pair.names[j+1],i,raw,pair.extra);pendingSingle='';addressField='';continue}
   const stripped=stripPrefix(raw);
   const maybe=canonical(stripped);
   if(maybe){if(pendingSingle){add(pendingSingle,maybe,i,raw);pendingSingle=''}else pendingSingle=maybe;continue}
